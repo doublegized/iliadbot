@@ -16,7 +16,8 @@
 
 
 from iliadbot import database
+import logging
 
-def before_processing(bot, update):
-    database.add_user_db(update.message.from_user.id)
-    
+def before_processing(update, context):
+    logging.debug('Update dettagli utente')
+    database.add_user_db(update.message.from_user.id, update.message.from_user.username)

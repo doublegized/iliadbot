@@ -24,7 +24,8 @@ if len(sys.argv) == 2:
     PATH = sys.argv[1]  # takes the path specified as arg instead of the default one
 try:
     with open(PATH, 'r') as stream:
-        conf = yaml.load(stream)
+        # conf = yaml.load(stream) # deprecated
+        conf = yaml.load(stream, Loader=yaml.FullLoader)
 except FileNotFoundError:
     print(
         "\n\nWARNING:\n"

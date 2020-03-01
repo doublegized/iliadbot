@@ -16,14 +16,16 @@
 
 
 import html
+import string
+
 from iliadbot import api
 from iliadbot import keyboards
 from iliadbot import emoji
 from iliadbot import utils
 
 
-def iliad_message_creation(iliad_id, iliad_password, which_dict='info_sim'):
-    login = api.login(iliad_id, iliad_password)
+def iliad_message_creation(iliad_id, iliad_password, which_dict='info_sim', t_id=0):
+    login = api.login(iliad_id, iliad_password, t_id)
     intro = {
         'italia': 'Le tue soglie in Italia {}'.format(emoji.italy),
         'estero': 'Le tue soglie all\'estero {}'.format(emoji.earth),
@@ -41,13 +43,13 @@ def iliad_message_creation(iliad_id, iliad_password, which_dict='info_sim'):
                 msg += "\n{}{}: {}".format(emoji.current_choice, html.escape(i[0]), html.escape(i[1]))
         keyboard = keyboards.update_iliad_data_kb(iliad_id, iliad_password, which_dict)
     else:  # invalid credentials
-        msg += "<b>ERRORE:</b> {}".format(html.escape("ID utente o password non corretto."))
+        msg += "<b>ERRORE:</b> {}".format(html.escape("ID utente o password non corretti"))
         keyboard = None
     return msg, keyboard
 
 
-def user_info_traffic_command(bot, update, args):
-    if len(args) != 2:
+def user_info_traffic_command(update, context):
+    if len(context.args) != 2:
         msg = (
             "Per utilizzare questo comando devi aggiungere id iliad come primo argomento e "
             "password iliad come secondo argomento.\nEsempio:\n\n<code>{} mio_id_iliad "
@@ -57,17 +59,30 @@ def user_info_traffic_command(bot, update, args):
         update.message.reply_html(msg)
         return
 
-    iliad_id, iliad_password = args
-    msg, keyboard = iliad_message_creation(iliad_id, iliad_password)
+    iliad_id, iliad_password = context.args
+
+    try:
+        int(iliad_id)
+    except ValueError as e:
+        logging.exception(f'Questo non sembra essere un id iliad {iliad_id}: {e}')
+        update.message.reply_html('Errore nel processare la richiesta, input errati')
+        return
+
+    if any(c not in string.ascii_letters + string.digits + '][!"#$%&\'()=\{\}*+,./:;' for c in iliad_password):
+        logging.error('Caratteri password non validi')
+        update.message.reply_html('Errore nel processare la richiesta, input errati')
+        return
+    
+    msg, keyboard = iliad_message_creation(iliad_id, iliad_password, t_id=update.message.from_user.id)
     update.message.reply_html(msg, reply_markup=keyboard)
 
 
-def help_command(bot, update):
+def help_command(update, context):
     msg = (
         "Questo bot permette di conoscere soglie e credito della tua SIM iliad. "
         "Il bot *non è ufficiale* e *non conserva o salva le tue credenziali di accesso*.\n"
-        "Il [codice sorgente](https://github.com/91DarioDev/iliadbot) è rilasciato sotto licenza AGPL 3.0.\n\n"
-        "*COMANDI SUPPORTATI:*\n\n /info - permette di conoscere stato soglie e credito"
+        "Il [codice sorgente](https://github.com/doublegized/iliadbot) è rilasciato sotto licenza AGPL 3.0.\n\n"
+        "*COMANDI SUPPORTATI:*\n\n/info - permette di conoscere stato soglie e credito"
         "\n/help - mostra un messaggio di aiuto"
     )
     update.message.reply_markdown(msg, disable_web_page_preview=True)

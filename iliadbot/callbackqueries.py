@@ -15,6 +15,8 @@
 # along with iliadbot.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import logging
+
 from iliadbot import commands
 from iliadbot import keyboards
 from iliadbot import database
@@ -22,15 +24,19 @@ from iliadbot import database
 from telegram.error import TelegramError
 
 
-def callback_query(bot, update):
-    query = update.callback_query
-    database.add_user_db(query.from_user.id)  # update db last activity date
+def callback_query(update, context):
+    try:
+        query = update.callback_query
+    except TypeError as e:
+        logging.exception(f'Errore in callback {e}')
+        return
+    database.add_user_db(query.from_user.id, query.from_user.username)  # update db last activity date
 
     if query.data.startswith("update_iliad"):
-        update_iliad(bot, query)
+        update_iliad(query)
 
 
-def update_iliad(bot, query):
+def update_iliad(query):
     id_iliad = query.data.split(":")[1]
     password_iliad = query.data.split(":")[2]
     try:

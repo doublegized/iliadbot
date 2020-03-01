@@ -3,3 +3,4 @@ Project manteiners:
 
 Contributors:
 - [Namoso](https://github.com/soermejo)
+- [GGZ](https://github.com/doublegized)

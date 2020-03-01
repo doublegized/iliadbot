@@ -1,4 +1,10 @@
-/config/config.yaml
+config/config.yaml
 *.pyc
 iliadbot.egg-info/
 *.db
+bin/
+lib/
+include/
+.Python
+iliadbot.code-workspace
+pip-selfcheck.json

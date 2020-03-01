@@ -30,6 +30,7 @@ from telegram.ext import (
     CallbackQueryHandler
 )
 
+from telegram.error import (TelegramError, Unauthorized, BadRequest, TimedOut, ChatMigrated, NetworkError)
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -39,14 +40,33 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def error(bot, update, error):
-    logger.warning('Update "%s" caused error "%s"' % (update, error))
+def error(update, context):
+    try:
+        logger.warning('Update "%s" caused error "%s"' % (update, context.error))
+    except Unauthorized as e:
+        # remove update.message.chat_id from conversation list
+        logger.exception(f'Errore: {e}')
+    except BadRequest as e:
+        # handle malformed requests - read more below!
+        logger.exception(f'Errore: {e}')
+    except TimedOut as e:
+        # handle slow connection problems
+        logger.exception(f'Errore: {e}')
+    except NetworkError as e:
+        # handle other connection problems
+        logger.exceptio(f'Errore: {e}')
+    except ChatMigrated as e:
+        # the chat_id of a group has changed, use e.new_chat_id instead
+        logger.exception(f'Errore: {e}')
+    except TelegramError as e:
+        # handle all other telegram related errors
+        logger.exception(f'Errore: {e}')
 
 
 def main():
     print("\nrunning...")
     # define the updater
-    updater = Updater(token=config.BOT_TOKEN)
+    updater = Updater(token=config.BOT_TOKEN, use_context=True)
     
     # define the dispatcher
     dp = updater.dispatcher
@@ -59,8 +79,7 @@ def main():
 
     # commands
     dp.add_handler(CommandHandler(('start', 'help'), commands.help_command))
-    dp.add_handler(CommandHandler('info', commands.user_info_traffic_command, pass_args=True))
-
+    dp.add_handler(CommandHandler('info', commands.user_info_traffic_command))
 
     # handle callbackqueries
     dp.add_handler(CallbackQueryHandler(callbackqueries.callback_query))

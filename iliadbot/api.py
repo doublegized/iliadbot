@@ -16,52 +16,65 @@
 
 
 import requests
+import logging
 from lxml import html
 import re
 import collections
 from iliadbot import emoji
 
-
 url = "https://www.iliad.it/account/"
 
 # italia xpaths
 dic_italia = collections.OrderedDict()
-dic_italia["{} chiamate".format(emoji.telephone)] = "/html/body/div[1]/div[2]/div/div/div/div/div[2]/div[2]/div[3]/div[1]/div[1]/div/div[1]"
-dic_italia["{} sms".format(emoji.sms)] = "/html/body/div[1]/div[2]/div/div/div/div/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[1]"
-dic_italia["{} internet".format(emoji.internet)] = "/html/body/div[1]/div[2]/div/div/div/div/div[2]/div[2]/div[3]/div[2]/div[1]/div/div[1]"
-dic_italia["{} mms".format(emoji.mms)] = "/html/body/div[1]/div[2]/div/div/div/div/div[2]/div[2]/div[3]/div[2]/div[2]/div/div[1]"
+dic_italia["{} chiamate".format(emoji.telephone)] = "/html/body/div[1]/div[1]/div/div/div/div/div[2]/div[2]/div[3]/div[1]/div[1]/div/div[1]"
+dic_italia["{} sms".format(emoji.sms)] = "/html/body/div[1]/div[1]/div/div/div/div/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[1]"
+dic_italia["{} internet".format(emoji.internet)] = "/html/body/div[1]/div[1]/div/div/div/div/div[2]/div[2]/div[3]/div[2]/div[1]/div/div[1]"
+dic_italia["{} mms".format(emoji.mms)] = "/html/body/div[1]/div[1]/div/div/div/div/div[2]/div[2]/div[3]/div[2]/div[2]/div/div[1]"
 
 # estero xpaths
 dic_estero = collections.OrderedDict()
-dic_estero["{} chiamate".format(emoji.telephone)] = "/html/body/div[1]/div[2]/div/div/div/div/div[2]/div[2]/div[4]/div[1]/div[1]/div/div[1]"
-dic_estero["{} sms".format(emoji.sms)] = "/html/body/div[1]/div[2]/div/div/div/div/div[2]/div[2]/div[4]/div[1]/div[2]/div/div[1]"
-dic_estero["{} internet".format(emoji.internet)] = "/html/body/div[1]/div[2]/div/div/div/div/div[2]/div[2]/div[4]/div[2]/div[1]/div/div[1]"
-dic_estero["{} mms".format(emoji.mms)] = "/html/body/div[1]/div[2]/div/div/div/div/div[2]/div[2]/div[4]/div[2]/div[2]/div/div[1]"
+dic_estero["{} chiamate".format(emoji.telephone)] = "/html/body/div[1]/div[1]/div/div/div/div/div[2]/div[2]/div[4]/div[1]/div[1]/div/div[1]"
+dic_estero["{} sms".format(emoji.sms)] = "/html/body/div[1]/div[1]/div/div/div/div/div[2]/div[2]/div[4]/div[1]/div[2]/div/div[1]"
+dic_estero["{} internet".format(emoji.internet)] = "/html/body/div[1]/div[1]/div/div/div/div/div[2]/div[2]/div[4]/div[2]/div[1]/div/div[1]"
+dic_estero["{} mms".format(emoji.mms)] = "/html/body/div[1]/div[1]/div/div/div/div/div[2]/div[2]/div[4]/div[2]/div[2]/div/div[1]"
 
 dic_general_info = collections.OrderedDict()
 dic_general_info["{} utente".format(emoji.user)] = "/html/body/div[1]/div[2]/div/nav/div/div/div[2]/div[1]"
-dic_general_info["{} id utente".format(emoji.user)] = "/html/body/div[1]/div[2]/div/nav/div/div/div[2]/div[2]"
-dic_general_info["{} numero".format(emoji.user)] = "/html/body/div[1]/div[2]/div/nav/div/div/div[2]/div[3]"
+dic_general_info["{} id utente".format(emoji.user)] = "/html/body/div[1]/div[1]/div/div/div/div/nav/div/div/div[2]/div[2]"
+dic_general_info["{} numero".format(emoji.user)] = "/html/body/div[1]/div[1]/div/div/div/div/nav/div/div/div[2]/div[3]"
 #dic_general_info["{} consumo totale".format(emoji.money)] = "/html/body/div[1]/div[2]/div[1]/div/div[2]/div[2]/div[6]/div[2]"   #removed from website
-dic_general_info["{} credito".format(emoji.money)] = "/html/body/div[1]/div[2]/div/div/div/div/div[2]/div[2]/h2/b"
-dic_general_info["{} rinnovo".format(emoji.renewal)] = "/html/body/div[1]/div[2]/div/div/div/div/div[2]/div[2]/div[2]"
+dic_general_info["{} credito".format(emoji.money)] = "/html/body/div[1]/div[1]/div/div/div/div/div[2]/div[2]/h2/b"
+dic_general_info["{} rinnovo".format(emoji.renewal)] = "/html/body/div[1]/div[1]/div/div/div/div/div[2]/div[2]/div[2]"
 
+credenziali_errate_path = '/html/body/div[1]/div[1]/div/div[1]/div'
 
-def login(id, pwd):
+def login(id_iliad, pwd, t_id):
     """
     params: id, pwd
     return: TreeObject
     """
-    data = {"login-ident":id, "login-pwd":pwd}
+    data = {"login-ident": id_iliad, "login-pwd":pwd}
 
-    r = requests.post(url, data=data)
+    logging.debug(f'Effettuo login utente {t_id}')
+    s = requests.Session()
+    if s.get(url).status_code != 200:
+        logging.error(f'Iliad server status code {r.status_code}')
+        return False
+    r = s.post(url, data=data)
+    if r.status_code != 200:
+        logging.error(f'Iliad server status code {r.status_code}')
+        return False
     tree = html.fromstring(r.content)
 
     # Return False if wrong credentials
-    if "ID utente o password non corretto." in tree.xpath('/html/body/div[1]/div[2]/div/div[1]/div/text()'):
-        return False
+    logging.debug(tree.xpath(credenziali_errate_path)[0].text_content())
+    if "ID utente o password non corretto." in tree.xpath(credenziali_errate_path)[0].text_content():
+        logging.warning(f'Utente {t_id}: credenziali errate')
+        return None
 
+    logging.debug(f'Effettuato login per utente {t_id}')
     return tree
+
 
 def get_info(tree, which_dic):
     """
@@ -70,6 +83,7 @@ def get_info(tree, which_dic):
     params: TreeObject
     return: dic
     """
+    logging.debug('Ricerco informazioni credito')
     info = []
 
     # which_dic to take

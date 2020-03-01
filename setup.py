@@ -22,7 +22,7 @@ import setuptools
 setuptools.setup(
 
     name="iliadbot",
-    version="1",
+    version="2",
 
     license="AGPL-3.0",
 
