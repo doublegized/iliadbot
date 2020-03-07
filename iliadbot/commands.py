@@ -16,6 +16,7 @@
 
 
 import html
+import logging
 import string
 
 from iliadbot import api
