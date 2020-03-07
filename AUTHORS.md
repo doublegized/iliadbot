@@ -1,6 +1,7 @@
 Project manteiners:
-- [Dario](https://github.com/91DarioDev) <dariomsn@hotmail.it>
 
-Contributors:
-- [Namoso](https://github.com/soermejo)
-- [GGZ](https://github.com/doublegized)
+- [doublegized](https://github.com/doublegized)
+
+Forked from:
+
+- [iliadbot](https://github.com/91DarioDev/iliadbot) by [91DarioDev](https://github.com/91DarioDev)

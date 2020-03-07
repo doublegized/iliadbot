@@ -57,7 +57,8 @@ def create_db():
             user_id INTEGER PRIMARY KEY, 
             username TEXT,
             last_activity TIMESTAMP,
-            registered_at TIMESTAMP
+            registered_at TIMESTAMP,
+            counter INTEGER
         )
     """
     run_query(query)
@@ -66,10 +67,10 @@ def create_db():
 @run_async
 def add_user_db(user_id, username):
     # try to update or ignore
-    query = "UPDATE OR IGNORE users SET last_activity = CURRENT_TIMESTAMP, username = ? WHERE user_id = ?"
+    query = "UPDATE OR IGNORE users SET last_activity = CURRENT_TIMESTAMP, username = ?, counter = counter + 1 WHERE user_id = ?"
     run_query(query, username, user_id)
     # try to add or ignore
-    query = "INSERT OR IGNORE INTO users(user_id, last_activity, registered_at, username) VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)"
+    query = "INSERT OR IGNORE INTO users(user_id, last_activity, registered_at, username, counter) VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 0)"
     run_query(query, user_id, username)
 
 # create the database

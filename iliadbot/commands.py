@@ -80,7 +80,7 @@ def user_info_traffic_command(update, context):
 def help_command(update, context):
     msg = (
         "Questo bot permette di conoscere soglie e credito della tua SIM iliad. "
-        "Il bot *non è ufficiale* e *non conserva o salva le tue credenziali di accesso*.\n"
+        "Il bot *non è ufficiale* e *non conserva o salva le tue credenziali di accesso*, tuttavia queste potrebbero rimanere sui server di Telegram. Utilizza il bot consapevolmente!\n"
         "Il [codice sorgente](https://github.com/doublegized/iliadbot) è rilasciato sotto licenza AGPL 3.0.\n\n"
         "*COMANDI SUPPORTATI:*\n\n/info - permette di conoscere stato soglie e credito"
         "\n/help - mostra un messaggio di aiuto"
