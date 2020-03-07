@@ -9,9 +9,18 @@ Il codice sorgente è rilasciato sotto licenza AGPL 3.0.
 <img src="../master/resources/screenshots/example_info_sim.jpg" width="250">
 </p>
 
+## Comandi supportati
+
+```
+/info - permette di conoscere stato soglie e credito`
+/help - mostra un messaggio di aiuto
+```
+
+## Istruzioni per propria istanza
+
 Di seguito le istruzioni per eseguire la tua istanza personale di questo bot.
 
-## Linux
+### Linux
 
 Per eseguire la tua istanza di questo bot su un sistema Linux usa le seguenti istruzioni:
 
@@ -36,23 +45,15 @@ rm -rf iliadbotenv
 
 **NOTA BENE**: Il primo parametro dell'eseguibile è il file `config.yaml`. Un esempio di file è presente in `config/config.example.yaml`: sovrascrivi i parametri con le tue impostazioni.
 
+### Docker
 
-## Docker
-
-Il bot può essere eseguito anche su un container docker. Di seguito i comandi per la build e per l'esecuzione:
-
-```
-docker image build -t iliadbot:1.0 .
-docker run -it -v /host/path/localdb:/app/localdb iliadbot:1.0
-```
-
-Il database viene salvato tramite *volumes* in modo da non perdere le statistiche in caso di stop del container. Non è tuttavia necessario utilizzare lo stesso database *sqlite*, dato che il bot è per sua natura stateless.
-
-
-
-## Comandi supportati
+Il bot può essere eseguito anche su un container docker. Di seguito i comandi per la build e per l'esecuzione del container.
 
 ```
-/info - permette di conoscere stato soglie e credito`
-/help - mostra un messaggio di aiuto
+docker image build -t iliadbot .
+docker run -it -v /host/path/localdb:/app/localdb iliadbot
 ```
+
+Il database viene salvato tramite *volumes* in modo da non perdere le statistiche in caso di stop/riavvio del container. Non è tuttavia necessario utilizzare lo stesso database *sqlite*, dato che il bot è per sua natura stateless e il database, se non presente, viene generato all'avvio.
+
+Per l'esecuzione del container su *Raspberry PI* è stato creato un `Dockerfile` apposito, salvato nella directory `rpi`.
